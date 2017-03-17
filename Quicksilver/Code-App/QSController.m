@@ -870,6 +870,7 @@ static QSController *defaultController = nil;
 	[QSLibrarian sharedInstance];
 	[QSExecutor sharedInstance];
 	[QSTaskController sharedInstance];
+	[NSApp setAutomaticCustomizeTouchBarMenuItemEnabled:YES];
 	
 #ifdef DEBUG
 	if (DEBUG_STARTUP)
