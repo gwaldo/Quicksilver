@@ -147,8 +147,13 @@ typedef enum {
 
     switch (check) {
         case kQSUpdateCheckError:
-            if (!quiet)
-                NSRunInformationalAlertPanel(@"Internet Connection Error", @"Unable to check for updates, the server could not be reached. Please check your internet connection", @"OK", nil, nil);
+			if (!quiet) {
+				[[QSAlertManager defaultManager] runAlertWithTitle:NSLocalizedString(@"Internet Connection Error", @"Update check error alert title")
+														   message:NSLocalizedString(@"Unable to check for updates, the server could not be reached. Please check your internet connection", @"Update check error alert message")
+														   buttons:@[NSLocalizedString(@"OK", @"Update check error alert default button")]
+															 style:NSAlertStyleWarning
+													attachToWindow:nil];
+			}
             return NO;
         break;
         case kQSUpdateCheckUpdateAvailable:
@@ -158,13 +163,27 @@ typedef enum {
 #ifndef DEBUG
                 [self performSelectorOnMainThread:@selector(installAppUpdate) withObject:nil waitUntilDone:NO];
 #endif
-            } else {
-                NSInteger selection = NSRunInformationalAlertPanel([NSString stringWithFormat:@"New Version of Quicksilver Available", nil], @"A new version of Quicksilver is available, would you like to update now?\n\n(Update from %@ → %@)", @"Install Update", @"Later", nil, [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleVersionKey],newVersion); //, @"More Info");
-                if (selection == 1) {
-                    [self performSelectorOnMainThread:@selector(installAppUpdate) withObject:nil waitUntilDone:NO];
-                } else if (selection == -1) {  //Go to web site
-                    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:kWebSiteURL]];
-                }
+			} else {
+				NSString *currentVersion = [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleVersionKey];
+				NSString *message = [NSString stringWithFormat:
+									 NSLocalizedString(@"A new version of Quicksilver is available, would you like to update now?\n\n(Update from %@ → %@)", @"Update available alert message"),
+									 currentVersion, newVersion];
+				[[QSAlertManager defaultManager] beginAlertWithTitle:NSLocalizedString(@"New Version of Quicksilver Available", @"Update available alert title")
+														   message:message
+														   buttons:@[
+																	 NSLocalizedString(@"Install Update", @"Update available alert default button"),
+																	 NSLocalizedString(@"Later", @"Update available alert cancel button"),
+																	 NSLocalizedString(@"More info", @"Update available alert third button")
+																	 ]
+															 style:NSAlertStyleInformational
+													onWindow:nil
+												   completionHandler:^(QSAlertResponse response) {
+													   if (response == QSAlertResponseOK) {
+														   [self installAppUpdate];
+													   } else if (response == QSAlertResponseThird) {
+														   [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:kWebSiteURL]];
+													   }
+												   }];
             }
             return YES;
         break;
@@ -175,8 +194,15 @@ typedef enum {
             if (updateStatus == QSPluginUpdateStatusNoUpdates) {
                 updated = NO;
                 NSLog(@"Quicksilver is up to date.");
-                if (!quiet)
-                    NSRunInformationalAlertPanel(@"You're up-to-date!", [NSString stringWithFormat:@"You already have the latest version of Quicksilver (%@) and all installed plugins", [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleVersionKey]] , @"OK", nil, nil);
+				if (!quiet) {
+					NSString *message = [NSString stringWithFormat:NSLocalizedString(@"You already have the latest version of Quicksilver (%@) and all installed plugins", @"Update not needed alert message"),
+										 [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleVersionKey]];
+					[[QSAlertManager defaultManager] runAlertWithTitle:NSLocalizedString(@"You're up-to-date!", @"Update not needed alert title")
+															   message:message
+															   buttons:@[NSLocalizedString(@"OK", @"Update not needed alert default button")]
+																 style:NSAlertStyleInformational
+														attachToWindow:nil];
+				}
             }
             return updated;
         break;

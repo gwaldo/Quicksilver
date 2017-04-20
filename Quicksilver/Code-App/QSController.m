@@ -46,7 +46,17 @@ static QSController *defaultController = nil;
 	
     if (![NSApplication isMavericks]) {
 		NSBundle *appBundle = [NSBundle mainBundle];
-		NSRunAlertPanel([NSString stringWithFormat:@"%@ %@ Mac OS X 10.9+",[appBundle objectForInfoDictionaryKey:@"CFBundleName"],NSLocalizedString(@"requires",nil)] ,[NSString stringWithFormat:NSLocalizedString(@"Recent versions of Quicksilver require Mac OS %@. Older %@ compatible versions are available from the http://qsapp.com/download.php", nil),@"10.9 Mountain Lion",@"10.3–10.8"], NSLocalizedString(@"OK",nil), nil, nil, [appBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"]);
+
+		NSString *minimumVersionString = @"Mac OS 10.9 Mountain Lion";
+		NSString *oldVersionsString = @"10.3–10.8";
+
+		NSAlert *alert = [[NSAlert alloc] init];
+		alert.messageText = [NSString stringWithFormat:NSLocalizedString(@"%@ %@ requires Mac OS X 10.9+", @"macOS version required alert title"), [appBundle objectForInfoDictionaryKey:@"CFBundleName"], [appBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"]];
+		alert.informativeText = [NSString stringWithFormat:NSLocalizedString(@"Recent versions of Quicksilver require %@. Older %@ compatible versions are available from the http://qsapp.com/download.php", @"macOS version required alert message"), minimumVersionString, oldVersionsString];
+		[alert addButtonWithTitle:NSLocalizedString(@"OK", nil)];
+
+		[alert runModal];
+
 		// Quit - we don't want to be running :)
 		[NSApp terminate:nil];
 	}

@@ -334,13 +334,28 @@
 	NSArray *loaded = [[self loadedPlugIns] allValues];
 	BOOL needsRelaunch = nil != [deletePlugIns firstObjectCommonWithArray:loaded];
 
-	NSInteger result;
-	if (needsRelaunch)
-		result = NSRunCriticalAlertPanel(@"Delete plugins?", @"Would you like to delete the selected plugins? A relaunch will be required", @"Delete and Relaunch", @"Cancel", nil);
-	else
-		result = NSRunCriticalAlertPanel(@"Delete plugins?", @"Would you like to delete the selected plugins?", @"Delete", @"Cancel", nil);
+	QSAlertResponse response;
+	if (needsRelaunch) {
+		response = [[QSAlertManager defaultManager] runAlertWithTitle:NSLocalizedString(@"Delete plugins?", @"Delete & relaunch alert title")
+															  message:NSLocalizedString(@"Would you like to delete the selected plugins? A relaunch will be required", @"Delete & relaunch alert message")
+															  buttons:@[
+																		NSLocalizedString(@"Delete and Relaunch", @"Delete & relaunch alert default button"),
+																		NSLocalizedString(@"Cancel", @"Delete & relaunch alert cancel button")
+																		]
+																style:NSAlertStyleWarning
+													   attachToWindow:nil];
+	} else {
+		response = [[QSAlertManager defaultManager] runAlertWithTitle:NSLocalizedString(@"Delete plugins?", @"Delete & relaunch alert title")
+															  message:NSLocalizedString(@"Would you like to delete the selected plugins?", @"Delete & relaunch alert message (alternate)")
+															  buttons:@[
+																		NSLocalizedString(@"Delete", @"Delete & relaunch alert default button (alternate)"),
+																		NSLocalizedString(@"Cancel", @"Delete & relaunch alert cancel button")
+																		]
+																style:NSAlertStyleWarning
+													   attachToWindow:nil];
+	}
 
-	if (result) {
+	if (response == QSAlertResponseOK) {
 		BOOL success = YES;
 		for(QSPlugIn * plugin in deletePlugIns) {
 			success = success && [plugin delete];
